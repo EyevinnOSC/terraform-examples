@@ -13,7 +13,6 @@ terraform {
 ############################
 
 ## --- General ---
-
 # Your OSC Personal Access Token (PAT). Sensitive
 variable "osc_pat" {
   type        = string
@@ -75,7 +74,6 @@ variable "db_name" {
 }
 
 locals {
-  #base_host = replace("${osc_apache_couchdb.this.instance_url}", "https://", "")
   base_host = trimprefix("${osc_apache_couchdb.this.instance_url}", "https://")
 }
 
@@ -167,8 +165,7 @@ resource "osc_eyevinn_intercom_manager" "this" {
 # Outputs
 ############################
 
-## --- SFU ---
-
+## --- SMB ---
 output "SFU_external_ip" {
   value = osc_eyevinn_docker_wrtc_sfu.this.external_ip
 }
