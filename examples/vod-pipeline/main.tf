@@ -209,9 +209,8 @@ resource "osc_secret" "redis_url" {
 ############################
 
 resource "osc_eyevinn_encore_callback_listener" "this" {
-  name      = var.encore_cb_instance_name
-  redis_url = format("{{secrets.%s}}", osc_secret.redis_url.secret_name)
-  #redis_url   = local.valkey_redis_url
+  name        = var.encore_cb_instance_name
+  redis_url   = format("{{secrets.%s}}", osc_secret.redis_url.secret_name)
   encore_url  = trimsuffix(osc_encore.this.instance_url, "/")
   redis_queue = var.encore_cb_redis_queue
 
