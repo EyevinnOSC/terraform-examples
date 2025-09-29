@@ -1,4 +1,4 @@
-## Terraform Example - VOD pipeline
+## Terraform/OpenTofu Example - VOD pipeline
 
 This solution will automaticall create a complete VOD pipeline including transcoding and ABR packaging, using the following OSC components
 
@@ -30,7 +30,7 @@ For installing, please see: [here](https://docs.aws.amazon.com/cli/latest/usergu
 
 ### Using
 
-1. Deploy the solution using the terraform script
+1. Deploy the solution using the terraform/tofu script
 2. Upload a video file to the MinIO storage like this:
 
    ```bash

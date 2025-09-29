@@ -1,4 +1,4 @@
-## Terraform Example - Intercom Solution
+## Terraform/OpenTofu Example - Intercom Solution
 
 This solution will automaticall create a complete Open Intercom solution with the following components:
 
