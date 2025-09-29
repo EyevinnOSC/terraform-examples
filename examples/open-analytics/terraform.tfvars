@@ -9,7 +9,7 @@ smoothmqinstancename = "terraformsmoothmqexample"
 
 ## -- ClickHouse Server --
 clickhouseinstancename = "terraformclickhouseserverexample"
-clickhousedbname = "epas_default"
+clickhousedbname       = "epas_default"
 # clickhouseusername = "Via Env Vars TF_VAR_clickhouseusername"
 # clickhousepassword = "Via Env Vars TF_VAR_clickhousepassword"
 

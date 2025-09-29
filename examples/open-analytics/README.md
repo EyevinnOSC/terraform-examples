@@ -1,4 +1,4 @@
-## Terraform Example - Open Analytics
+## Terraform/OpenTofu Example - Open Analytics
 
 This solution is based on the use case where you have a streaming solution up and running and you want to gather analytics, using the following OSC components
 
@@ -29,7 +29,7 @@ For installing, please see: [here](https://docs.aws.amazon.com/cli/latest/usergu
 
 ### Using
 
-1. Deploy the solution using the terraform script
+1. Deploy the solution using the terraform/tofu script
 2. To try it out:
     a) Play/pause a movie from the streaming solution that was up-and-running prior to this solution.
     b) If no up-and-running solution is available -> Run this bash to send a mocked action: "curl -X POST --json '{ "event": "init", "sessionId": "3", "timestamp": 1740411580982, "playhead": -1, "duration": -1 }' <eventsink-URL>"

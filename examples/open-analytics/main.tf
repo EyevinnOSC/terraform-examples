@@ -1,30 +1,31 @@
-terraform { 
-  required_providers { 
-    osc = { 
-      source = "EyevinnOSC/osc" 
+terraform {
+  required_version = ">= 1.6.0" # Compatible with Terraform >= 1.6.0 and OpenTofu >= 1.6.0
+  required_providers {
+    osc = {
+      source = "EyevinnOSC/osc"
       #source = "local/eyevinnosc/osc" 
-      version = "0.1.6" 
-    } 
-  } 
-} 
+      version = "0.1.6"
+    }
+  }
+}
 ############################
 # Provider
 ############################
-provider "osc" { 
-  pat         = var.osc_pat 
-  environment = var.osc_environment 
-} 
+provider "osc" {
+  pat         = var.osc_pat
+  environment = var.osc_environment
+}
 
 ############################
 # Storage 
 ############################
 # used to store the queue name created by aws
-data "local_file" "queue_output" { 
-  filename = "${path.module}/queue_output.json" 
-  depends_on = [null_resource.create_queue] 
-} 
+data "local_file" "queue_output" {
+  filename   = "${path.module}/queue_output.json"
+  depends_on = [null_resource.create_queue]
+}
 locals {
-  queue_url = jsondecode(data.local_file.queue_output.content).QueueUrl
+  queue_url       = jsondecode(data.local_file.queue_output.content).QueueUrl
   clickhouse_host = replace(osc_clickhouse_clickhouse.clickhouse_instance.instance_url, "https://", "")
 }
 
@@ -66,79 +67,79 @@ resource "osc_secret" "clickhouseurl" {
 ## --- General ---
 
 # Your OSC Personal Access Token (PAT). Sensitive
-variable "osc_pat" { 
-  type      = string 
-  sensitive = true 
+variable "osc_pat" {
+  type        = string
+  sensitive   = true
   description = "Eyevinn OSC Personal Access Token"
-} 
+}
 
 # Environment prod|stage|dev
-variable "osc_environment" { 
-  type    = string 
-  default = "prod" 
+variable "osc_environment" {
+  type        = string
+  default     = "prod"
   description = "OSC Environment"
-} 
+}
 
 ############################
 # SmoothMQ
 ############################
-variable "smoothmqinstancename"{ 
-  type = string 
-  default = "terraformsmoothmq" 
+variable "smoothmqinstancename" {
+  type        = string
+  default     = "terraformsmoothmq"
   description = "The instance name. Shown in the OSC APP UI. Lower case letters and numbers only"
-} 
-variable "smoothmqaccesskey"{ 
-  type = string 
-  sensitive = true
+}
+variable "smoothmqaccesskey" {
+  type        = string
+  sensitive   = true
   description = "SmoothMQ Access Key"
-} 
-variable "smoothmqsecretkey"{ 
-  type = string 
-  sensitive = true
+}
+variable "smoothmqsecretkey" {
+  type        = string
+  sensitive   = true
   description = "SmoothMQ Secret Key"
-} 
+}
 
 ############################
 # ClickHouse Server
 ############################
-variable "clickhouseinstancename"{ 
-  type = string 
-  default = "terraformclickhousedb" 
+variable "clickhouseinstancename" {
+  type        = string
+  default     = "terraformclickhousedb"
   description = "The instance name. Shown in the OSC APP UI. Lower case letters and numbers only"
-} 
-variable "clickhousedbname"{ 
-  type = string 
-  default = "terraformdbname" 
+}
+variable "clickhousedbname" {
+  type        = string
+  default     = "terraformdbname"
   description = "ClickHouse Server Database Name"
-} 
-variable "clickhouseusername"{ 
-  type = string 
-  sensitive = true
+}
+variable "clickhouseusername" {
+  type        = string
+  sensitive   = true
   description = "ClickHouse Server Username"
-} 
-variable "clickhousepassword"{ 
-  type = string 
-  sensitive = true
+}
+variable "clickhousepassword" {
+  type        = string
+  sensitive   = true
   description = "Clickhouse Server Password"
-} 
+}
 
 ############################
 # Player Analytics Eventsink
 ############################
-variable "playeranalyticseventsinkinstancename"{ 
-  type = string 
-  default = "terraformeventsink" 
+variable "playeranalyticseventsinkinstancename" {
+  type        = string
+  default     = "terraformeventsink"
   description = "The instance name. Shown in the OSC APP UI. Lower case letters and numbers only"
-} 
+}
 
 ############################
 # Player Analytics Worker
 ############################
-variable "playeranalyticsworkerinstancename"{ 
-  type = string 
-  default = "terraformplayeranalyticsworker" 
+variable "playeranalyticsworkerinstancename" {
+  type        = string
+  default     = "terraformplayeranalyticsworker"
   description = "The instance name. Shown in the OSC APP UI. Lower case letters and numbers only"
-}   
+}
 
 ############################
 # null_resources (scripts)
@@ -150,7 +151,7 @@ resource "null_resource" "create_queue" {
     environment = {
     }
     interpreter = ["/bin/bash", "-c"]
-    command = <<EOT
+    command     = <<EOT
       bash ${path.module}/scripts/create_queue.sh \
       ${osc_poundifdef_smoothmq.smooth_mq_instance.instance_url} \
       ${var.smoothmqinstancename}
@@ -165,7 +166,7 @@ resource "null_resource" "wait_for_queue" {
     environment = {
     }
     interpreter = ["/bin/bash", "-c"]
-    command = <<EOT
+    command     = <<EOT
       bash ${path.module}/scripts/wait_for_queue.sh \
         ${local.queue_url} \
         ${osc_poundifdef_smoothmq.smooth_mq_instance.instance_url}
@@ -177,31 +178,31 @@ resource "null_resource" "wait_for_queue" {
 # Services
 ############################
 
-resource "osc_poundifdef_smoothmq" "smooth_mq_instance"{ 
-  name = "${var.smoothmqinstancename}" 
+resource "osc_poundifdef_smoothmq" "smooth_mq_instance" {
+  name       = var.smoothmqinstancename
   access_key = format("{{secrets.%s}}", osc_secret.smoothmqaccesskey.secret_name)
   secret_key = format("{{secrets.%s}}", osc_secret.smoothmqsecretkey.secret_name)
-} 
+}
 resource "osc_eyevinn_player_analytics_eventsink" "eventsink_instance" {
-  name = "${var.playeranalyticseventsinkinstancename}"
-  aws_access_key_id = format("{{secrets.%s}}", osc_secret.smoothmqaccesskey.secret_name)
+  name                  = var.playeranalyticseventsinkinstancename
+  aws_access_key_id     = format("{{secrets.%s}}", osc_secret.smoothmqaccesskey.secret_name)
   aws_secret_access_key = format("{{secrets.%s}}", osc_secret.smoothmqsecretkey.secret_name)
-  sqs_queue_url = local.queue_url
-  sqs_endpoint = osc_poundifdef_smoothmq.smooth_mq_instance.instance_url
+  sqs_queue_url         = local.queue_url
+  sqs_endpoint          = osc_poundifdef_smoothmq.smooth_mq_instance.instance_url
 }
 resource "osc_clickhouse_clickhouse" "clickhouse_instance" {
-  name = "${var.clickhouseinstancename}"
-  db = "${var.clickhousedbname}"
-  user = format("{{secrets.%s}}", osc_secret.clickhouseusername.secret_name)
+  name     = var.clickhouseinstancename
+  db       = var.clickhousedbname
+  user     = format("{{secrets.%s}}", osc_secret.clickhouseusername.secret_name)
   password = format("{{secrets.%s}}", osc_secret.clickhousepassword.secret_name)
 }
 resource "osc_eyevinn_player_analytics_worker" "worker_instance" {
-  name = "${var.playeranalyticsworkerinstancename}"
-  click_house_url = format("{{secrets.%s}}", osc_secret.clickhouseurl.secret_name)
-  sqs_queue_url = "${local.queue_url}"
-  aws_access_key_id = format("{{secrets.%s}}", osc_secret.smoothmqaccesskey.secret_name)
+  name                  = var.playeranalyticsworkerinstancename
+  click_house_url       = format("{{secrets.%s}}", osc_secret.clickhouseurl.secret_name)
+  sqs_queue_url         = local.queue_url
+  aws_access_key_id     = format("{{secrets.%s}}", osc_secret.smoothmqaccesskey.secret_name)
   aws_secret_access_key = format("{{secrets.%s}}", osc_secret.smoothmqsecretkey.secret_name)
-  sqs_endpoint = "${osc_poundifdef_smoothmq.smooth_mq_instance.instance_url}"
+  sqs_endpoint          = osc_poundifdef_smoothmq.smooth_mq_instance.instance_url
 }
 
 ############################
