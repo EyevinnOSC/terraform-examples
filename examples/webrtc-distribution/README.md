@@ -2,7 +2,7 @@
 
 This solution will automatically create a complete WebRTC Distribution solution with the following components:
 
-- Sympony Media Bridge
+- Symphony Media Bridge
 - Symphony Media Bridge WHIP Gateway
 - Symphony Media Bridge WHEP Gateway
 
