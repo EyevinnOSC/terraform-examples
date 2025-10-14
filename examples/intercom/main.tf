@@ -27,12 +27,10 @@ variable "osc_environment" {
   description = "OSC Environment"
 }
 
-## --- Intercom SMB ---
-# A friendly name for the SMB
-variable "intercom_smb_name" {
+variable "intercom_name" {
   type        = string
-  default     = "examplesmb"
-  description = "Name of the SMB. Lower case letters and numbers only"
+  default     = "myintercom"
+  description = "Name of the intercom system. Lower case letters and numbers only"
 }
 
 # Intercom SMB API key. Sensitive
@@ -42,28 +40,12 @@ variable "smb_api_key" {
   description = "Symphony Media Bridge API key"
 }
 
-## --- Intercom Manager --- 
-# A friendly name for the Intercom manager
-variable "intercom_manager_name" {
-  type        = string
-  default     = "exampleintercommanager"
-  description = "Name of the Intercom system. Lower case letters and numbers only"
-}
-
 ## --- Intercom DB ---
 # Password for admin user. Sensitive
 variable "db_admin_password" {
   type        = string
-  default     = "secretePassword"
   sensitive   = true
   description = "The DB password"
-}
-
-# A friendly name for the database instance
-variable "intercom_db_name" {
-  type        = string
-  default     = "exampleintercomdatabase"
-  description = "Name of the database instance for the Intercom system. Lower case letters and numbers only"
 }
 
 # Name of the actual database to create
@@ -91,25 +73,25 @@ provider "osc" {
 
 resource "osc_secret" "token" {
   service_ids  = ["eyevinn-intercom-manager"]
-  secret_name  = "terraformoscpat"
+  secret_name  = "${var.intercom_name}oscpat"
   secret_value = var.osc_pat
 }
 
 resource "osc_secret" "apikey" {
   service_ids  = ["eyevinn-intercom-manager", "eyevinn-docker-wrtc-sfu"]
-  secret_name  = "terraformsmbapikey"
+  secret_name  = "${var.intercom_name}smbapikey"
   secret_value = var.smb_api_key
 }
 
 resource "osc_secret" "dbadminpassword" {
   service_ids  = ["apache-couchdb"]
-  secret_name  = "terraformdbadminpass"
+  secret_name  = "${var.intercom_name}dbadminpass"
   secret_value = var.db_admin_password
 }
 
 resource "osc_secret" "dburl" {
   service_ids  = ["eyevinn-intercom-manager"]
-  secret_name  = "terraformdburl"
+  secret_name  = "${var.intercom_name}dburl"
   secret_value = "https://admin:${var.db_admin_password}@${local.base_host}/${var.db_name}"
 }
 
@@ -117,7 +99,7 @@ resource "osc_secret" "dburl" {
 # Resource: Symphony Media Bridge
 ############################
 resource "osc_eyevinn_docker_wrtc_sfu" "this" {
-  name    = var.intercom_smb_name
+  name    = var.intercom_name
   api_key = format("{{secrets.%s}}", osc_secret.apikey.secret_name)
 }
 
@@ -126,7 +108,7 @@ resource "osc_eyevinn_docker_wrtc_sfu" "this" {
 ############################
 
 resource "osc_apache_couchdb" "this" {
-  name           = var.intercom_db_name
+  name           = var.intercom_name
   admin_password = format("{{secrets.%s}}", osc_secret.dbadminpassword.secret_name)
 }
 
@@ -149,7 +131,7 @@ resource "null_resource" "wait_for_couchdb" {
 # Resource: Eyevinn Intercom Manager
 ############################
 resource "osc_eyevinn_intercom_manager" "this" {
-  name        = var.intercom_manager_name
+  name        = var.intercom_name
   smb_url     = osc_eyevinn_docker_wrtc_sfu.this.instance_url
   smb_api_key = format("{{secrets.%s}}", osc_secret.apikey.secret_name)
   db_url      = format("{{secrets.%s}}", osc_secret.dburl.secret_name)

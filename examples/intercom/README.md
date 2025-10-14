@@ -10,8 +10,7 @@ See general guidelines [here](../../README.md#quick-guide---general)
 
 ### Solution variables
 
-- see \*.tfvars
-- Env variables
+- Env variables that needs to be set
 
 ```bash
 export TF_VAR_osc_pat = <osc personal access token>
