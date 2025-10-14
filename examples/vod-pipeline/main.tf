@@ -21,12 +21,13 @@ variable "osc_pat" {
   description = "Eyevinn OSC Personal Access Token"
 }
 
-## --- MinIO storage
-variable "minio_instance_name" {
+variable "vodpipeline_name" {
   type        = string
-  description = "The instance name. Shown in the OSC APP UI. Lower case letters and numbers only "
-  default     = "minio"
+  description = "The vod pipeline name. Lower case letters and numbers only "
+  default     = "myvodpipeline"
 }
+
+## --- MinIO storage
 
 variable "minio_username" {
   type        = string
@@ -41,24 +42,14 @@ variable "minio_password" {
 }
 
 ## --- Encore ---
-variable "encore_instance_name" {
-  type        = string
-  description = "The instance name. Shown in the OSC App UI. Lower case letters and numbers only"
-  default     = "encore"
-}
 
 variable "encore_bucket" {
   type        = string
   default     = "encore"
-  description = "The bucket used for encore inputs and outputs"
+  description = "The bucket used for encore inputs and outputs. Bucket naming rules apply!"
 }
 
 # --- Valkey
-variable "valkey_instance_name" {
-  type        = string
-  default     = "valkey"
-  description = "The instance name. Shown in the OSC APP UI. Lower case letters and numbers only"
-}
 
 variable "valkey_password" {
   type        = string
@@ -67,11 +58,6 @@ variable "valkey_password" {
 }
 
 # --- Encore Callback Listener
-variable "encore_cb_instance_name" {
-  type        = string
-  default     = "encorecb"
-  description = "The instance name. Shown in the OSC APP UI. Lower case letters and numbers only"
-}
 
 variable "encore_cb_redis_queue" {
   type        = string
@@ -80,16 +66,11 @@ variable "encore_cb_redis_queue" {
 }
 
 # --- Encore Packager
-variable "encore_packager_instance_name" {
-  type        = string
-  default     = "encorepackager"
-  description = "The instance name. Shown in the OSC APP UI. Lower case letters and numbers only"
-}
 
 variable "encore_packager_bucket" {
   type        = string
-  default     = "encore_packager"
-  description = "The bucket used for the encore packager output"
+  default     = "encore-packager"
+  description = "The bucket used for the encore packager output. Bucket naming rules apply!"
 }
 
 variable "encore_packager_output_folder" {
@@ -126,25 +107,25 @@ provider "osc" {
 
 resource "osc_secret" "miniousername" {
   service_ids  = ["minio-minio", "encore", "eyevinn-encore-packager"]
-  secret_name  = "terraformminiousername"
+  secret_name  = "${var.vodpipeline_name}mminiousername"
   secret_value = var.minio_username
 }
 
 resource "osc_secret" "miniopassword" {
   service_ids  = ["minio-minio", "encore", "eyevinn-encore-packager"]
-  secret_name  = "terraformminiopassword"
+  secret_name  = "${var.vodpipeline_name}miniopassword"
   secret_value = var.minio_password
 }
 
 resource "osc_secret" "valkeypassword" {
   service_ids  = ["valkey-io-valkey"]
-  secret_name  = "terraformvalkeypassword"
+  secret_name  = "${var.vodpipeline_name}valkeypassword"
   secret_value = var.valkey_password
 }
 
 resource "osc_secret" "token" {
   service_ids  = ["eyevinn-encore-packager"]
-  secret_name  = "terraformoscpat"
+  secret_name  = "${var.vodpipeline_name}oscpat"
   secret_value = var.osc_pat
 }
 
@@ -153,7 +134,7 @@ resource "osc_secret" "token" {
 # Resource: Minio storage
 ############################
 resource "osc_minio_minio" "this" {
-  name          = var.minio_instance_name
+  name          = var.vodpipeline_name
   root_user     = format("{{secrets.%s}}", osc_secret.miniousername.secret_name)
   root_password = format("{{secrets.%s}}", osc_secret.miniopassword.secret_name)
 }
@@ -176,7 +157,7 @@ resource "null_resource" "create_buckets" {
 # Resource: Encore
 ############################
 resource "osc_encore" "this" {
-  name                 = var.encore_instance_name
+  name                 = var.vodpipeline_name
   s3_access_key_id     = osc_minio_minio.this.root_user
   s3_secret_access_key = osc_minio_minio.this.root_password
 
@@ -190,7 +171,7 @@ resource "osc_encore" "this" {
 ############################
 
 resource "osc_valkey_io_valkey" "this" {
-  name = var.valkey_instance_name
+  name = var.vodpipeline_name
 
   password = format("{{secrets.%s}}", osc_secret.valkeypassword.secret_name)
 
@@ -199,7 +180,7 @@ resource "osc_valkey_io_valkey" "this" {
 
 resource "osc_secret" "redis_url" {
   service_ids  = ["eyevinn-encore-callback-listener", "eyevinn-encore-packager"]
-  secret_name  = "terraformredisurl"
+  secret_name  = "${var.vodpipeline_name}redisurl"
   secret_value = local.valkey_redis_url
   depends_on   = [osc_valkey_io_valkey.this]
 }
@@ -209,7 +190,7 @@ resource "osc_secret" "redis_url" {
 ############################
 
 resource "osc_eyevinn_encore_callback_listener" "this" {
-  name        = var.encore_cb_instance_name
+  name        = var.vodpipeline_name
   redis_url   = format("{{secrets.%s}}", osc_secret.redis_url.secret_name)
   encore_url  = trimsuffix(osc_encore.this.instance_url, "/")
   redis_queue = var.encore_cb_redis_queue
@@ -221,7 +202,7 @@ resource "osc_eyevinn_encore_callback_listener" "this" {
 # Resource: Encore Packager
 ############################
 resource "osc_eyevinn_encore_packager" "this" {
-  name = var.encore_packager_instance_name
+  name = var.vodpipeline_name
 
   redis_url             = format("{{secrets.%s}}", osc_secret.redis_url.secret_name)
   aws_access_key_id     = osc_minio_minio.this.root_user
@@ -232,7 +213,7 @@ resource "osc_eyevinn_encore_packager" "this" {
   # optionals
   aws_region      = osc_encore.this.s3_region
   s3_endpoint_url = osc_minio_minio.this.instance_url
-  redis_queue     = osc_eyevinn_encore_callback_listener.this.redis_queue
+  redis_queue     = var.encore_cb_redis_queue
 
   depends_on = [osc_eyevinn_encore_callback_listener.this]
 }

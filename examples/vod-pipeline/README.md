@@ -12,8 +12,7 @@ See general guidelines [here](../../README.md#quick-guide---general)
 
 ### Solution variables
 
-- see \*.tfvars
-- Env variables
+- Env variables that needs to be set
 
 ```bash
 export TF_VAR_osc_pat = <osc personal access token>
@@ -27,6 +26,8 @@ export TF_VAR_valkey_password = <Password for the Valkey store>
 ! Note that the AWS CLI has to be installed since the terraform deployment takes care of creating the buckets automatically
 
 For installing, please see: [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html)
+
+Note!! - S3 CLI Env Var `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` must match `minio_username` and `minio_password`
 
 ### Using
 
@@ -42,7 +43,7 @@ For installing, please see: [here](https://docs.aws.amazon.com/cli/latest/usergu
    This will upload a video file named test_local.mp4 located in user root, to the bucket named "encore-terraform" (see variables) and folder named "input". The folder "input" will automatically be created:
 
    ```bash
-   aws --endpoint-url https://eyevinnlab-terraformminioexample.minio-minio.auto.prod.osaas.io s3 cp ~/test_local.mp4 s3://encore-terraform/input/
+   aws --endpoint-url https://eyevinnlab-myvodpipeline.minio-minio.auto.prod.osaas.io s3 cp ~/test_local.mp4 s3://encore/input/
    ```
 
 3. POST an encore job. This can be done via the swagger pages:
@@ -55,12 +56,12 @@ For installing, please see: [here](https://docs.aws.amazon.com/cli/latest/usergu
    {
      "externalId": "terraform_test",
      "profile": "program",
-     "outputFolder": "s3://encore-terraform/output/",
+     "outputFolder": "s3://encore/output/",
      "baseName": "terraformtest",
-     "progressCallbackUri": "https://eyevinnlab-terraformencorecbexample.eyevinn-encore-callback-listener.auto.prod.osaas.io/encoreCallback",
+     "progressCallbackUri": "https://eyevinnlab-myvodpipeline.eyevinn-encore-callback-listener.auto.prod.osaas.io/encoreCallback",
      "inputs": [
        {
-         "uri": "s3://encore-terraform/input/test_local.mp4",
+         "uri": "s3://encore/input/test_local.mp4",
          "seekTo": 0,
          "copyTs": true,
          "type": "AudioVideo"
@@ -76,7 +77,5 @@ Instead of uploading the input source file to the MinIO storage you can instead 
 4. Check for packager output using the AWS CLI (example)
 
 ```bash
-   aws --endpoint-url https://eyevinnlab-terraformminioexample.minio-minio.auto.prod.osaas.io s3 ls s3://encore-packager-terraform --recursive
+   aws --endpoint-url https://eyevinnlab-terraformminioexample.minio-minio.auto.prod.osaas.io s3 ls s3://encore-packager --recursive
 ```
-
-where the bucket name "encore-packager-terraform" is defined in `terraform.tfvars`
