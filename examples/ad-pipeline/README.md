@@ -7,15 +7,15 @@ This solution will automatically create a complete Ad pipeline using the followi
 - Encore (VOD transcoding system)
 - Encore Packager (Packages the transcoded files to ABR-packages)
 - Test Adserver (Generation of VAST/VMAP responses with example data and example ad assets)
-- Ad Normalizer (Proxy between an Adstitcher and the Test Adserver. Orchastrates automatic transcoding and packaging of ad assets)
+- Ad Normalizer (Proxy between an Adstitcher and the Test Adserver. Orchestrates automatic transcoding and packaging of ad assets)
 
-<a href="Ad-pipeline_diagram.png"><img src="Ad-pipeline_diagram.png" width="700" alt="Pipeline Diagram"></a>
+<a href="Ad-pipeline_diagram.png"><img src="Ad-pipeline_diagram.png" width="800" alt="Pipeline Diagram"></a>
 
 See general guidelines [here](../../README.md#quick-guide---general)
 
 ### Solution variables
 
-- Env variables that needs to be set
+Env variables that needs to be set
 
 ```bash
 export TF_VAR_osc_pat = <osc personal access token>
