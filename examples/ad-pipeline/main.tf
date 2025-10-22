@@ -142,6 +142,10 @@ resource "null_resource" "create_buckets" {
   provisioner "local-exec" {
     command     = "${path.module}/create_buckets.sh ${osc_minio_minio.this.instance_url} ${var.encore_bucket} ${var.encore_packager_bucket}"
     interpreter = ["/bin/bash", "-c"]
+    environment = {
+      AWS_ACCESS_KEY_ID     = var.minio_username
+      AWS_SECRET_ACCESS_KEY = var.minio_password
+    }
   }
 }
 
