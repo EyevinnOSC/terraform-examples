@@ -16,49 +16,6 @@ provider "osc" {
   environment = var.osc_environment
 }
 
-############################
-# Storage 
-############################
-# used to store the queue name created by aws
-data "local_file" "queue_output" {
-  filename   = "${path.module}/queue_output.json"
-  depends_on = [null_resource.create_queue]
-}
-locals {
-  queue_url       = jsondecode(data.local_file.queue_output.content).QueueUrl
-  clickhouse_host = replace(osc_clickhouse_clickhouse.clickhouse_instance.instance_url, "https://", "")
-}
-
-
-############################
-# Resource: Secrets
-############################
-
-resource "osc_secret" "smoothmqaccesskey" {
-  service_ids  = ["poundifdef-smoothmq", "eyevinn-player-analytics-eventsink", "eyevinn-player-analytics-worker"]
-  secret_name  = "terraformsmoothmqaccesskey"
-  secret_value = var.smoothmqaccesskey
-}
-resource "osc_secret" "smoothmqsecretkey" {
-  service_ids  = ["poundifdef-smoothmq", "eyevinn-player-analytics-eventsink", "eyevinn-player-analytics-worker"]
-  secret_name  = "terraformsmoothmqsecretkey"
-  secret_value = var.smoothmqsecretkey
-}
-resource "osc_secret" "clickhouseusername" {
-  service_ids  = ["clickhouse-clickhouse", "eyevinn-player-analytics-worker"]
-  secret_name  = "terraformclickhouseusername"
-  secret_value = var.clickhouseusername
-}
-resource "osc_secret" "clickhousepassword" {
-  service_ids  = ["clickhouse-clickhouse", "eyevinn-player-analytics-worker"]
-  secret_name  = "terraformclickhousepassword"
-  secret_value = var.clickhousepassword
-}
-resource "osc_secret" "clickhouseurl" {
-  service_ids  = ["eyevinn-player-analytics-worker"]
-  secret_name  = "clickhouseconstructedurl"
-  secret_value = "https://${var.clickhouseusername}:${var.clickhousepassword}@${local.clickhouse_host}"
-}
 
 ############################
 # Variables 
@@ -80,14 +37,16 @@ variable "osc_environment" {
   description = "OSC Environment"
 }
 
+variable "analyticspeline_name" {
+  type        = string
+  default     = "myopenanalytics"
+  description = "Name of the analytics pipeline. Lower case letters and numbers only"
+}
+
 ############################
 # SmoothMQ
 ############################
-variable "smoothmqinstancename" {
-  type        = string
-  default     = "terraformsmoothmq"
-  description = "The instance name. Shown in the OSC APP UI. Lower case letters and numbers only"
-}
+
 variable "smoothmqaccesskey" {
   type        = string
   sensitive   = true
@@ -102,16 +61,7 @@ variable "smoothmqsecretkey" {
 ############################
 # ClickHouse Server
 ############################
-variable "clickhouseinstancename" {
-  type        = string
-  default     = "terraformclickhousedb"
-  description = "The instance name. Shown in the OSC APP UI. Lower case letters and numbers only"
-}
-variable "clickhousedbname" {
-  type        = string
-  default     = "terraformdbname"
-  description = "ClickHouse Server Database Name"
-}
+
 variable "clickhouseusername" {
   type        = string
   sensitive   = true
@@ -124,22 +74,35 @@ variable "clickhousepassword" {
 }
 
 ############################
-# Player Analytics Eventsink
+# Resource: Secrets
 ############################
-variable "playeranalyticseventsinkinstancename" {
-  type        = string
-  default     = "terraformeventsink"
-  description = "The instance name. Shown in the OSC APP UI. Lower case letters and numbers only"
+
+resource "osc_secret" "smoothmqaccesskey" {
+  service_ids  = ["poundifdef-smoothmq", "eyevinn-player-analytics-eventsink", "eyevinn-player-analytics-worker"]
+  secret_name  = "${var.analyticspeline_name}smoothmqaccesskey"
+  secret_value = var.smoothmqaccesskey
+}
+resource "osc_secret" "smoothmqsecretkey" {
+  service_ids  = ["poundifdef-smoothmq", "eyevinn-player-analytics-eventsink", "eyevinn-player-analytics-worker"]
+  secret_name  = "${var.analyticspeline_name}smoothmqsecretkey"
+  secret_value = var.smoothmqsecretkey
+}
+resource "osc_secret" "clickhouseusername" {
+  service_ids  = ["clickhouse-clickhouse", "eyevinn-player-analytics-worker"]
+  secret_name  = "${var.analyticspeline_name}clickhouseusername"
+  secret_value = var.clickhouseusername
+}
+resource "osc_secret" "clickhousepassword" {
+  service_ids  = ["clickhouse-clickhouse", "eyevinn-player-analytics-worker"]
+  secret_name  = "${var.analyticspeline_name}clickhousepassword"
+  secret_value = var.clickhousepassword
+}
+resource "osc_secret" "clickhouseurl" {
+  service_ids  = ["eyevinn-player-analytics-worker"]
+  secret_name  = "${var.analyticspeline_name}clickhouseconstructedurl"
+  secret_value = "https://${var.clickhouseusername}:${var.clickhousepassword}@${local.clickhouse_host}"
 }
 
-############################
-# Player Analytics Worker
-############################
-variable "playeranalyticsworkerinstancename" {
-  type        = string
-  default     = "terraformplayeranalyticsworker"
-  description = "The instance name. Shown in the OSC APP UI. Lower case letters and numbers only"
-}
 
 ############################
 # null_resources (scripts)
@@ -149,21 +112,39 @@ variable "playeranalyticsworkerinstancename" {
 resource "null_resource" "create_queue" {
   provisioner "local-exec" {
     environment = {
+      AWS_ACCESS_KEY_ID     = var.smoothmqaccesskey
+      AWS_SECRET_ACCESS_KEY = var.smoothmqsecretkey
     }
     interpreter = ["/bin/bash", "-c"]
     command     = <<EOT
       bash ${path.module}/scripts/create_queue.sh \
       ${osc_poundifdef_smoothmq.smooth_mq_instance.instance_url} \
-      ${var.smoothmqinstancename}
+      ${osc_poundifdef_smoothmq.smooth_mq_instance.name}
     EOT
   }
 }
+
+############################
+# Storage 
+############################
+# used to store the queue name created by aws
+data "local_file" "queue_output" {
+  filename   = "${path.module}/queue_output.json"
+  depends_on = [null_resource.create_queue]
+}
+locals {
+  queue_url       = jsondecode(data.local_file.queue_output.content).QueueUrl
+  clickhouse_host = replace(osc_clickhouse_clickhouse.clickhouse_instance.instance_url, "https://", "")
+}
+
 
 ## polling waiting for queue to be ready
 resource "null_resource" "wait_for_queue" {
   depends_on = [local.queue_url]
   provisioner "local-exec" {
     environment = {
+      AWS_ACCESS_KEY_ID     = var.smoothmqaccesskey
+      AWS_SECRET_ACCESS_KEY = var.smoothmqsecretkey
     }
     interpreter = ["/bin/bash", "-c"]
     command     = <<EOT
@@ -179,25 +160,24 @@ resource "null_resource" "wait_for_queue" {
 ############################
 
 resource "osc_poundifdef_smoothmq" "smooth_mq_instance" {
-  name       = var.smoothmqinstancename
+  name       = var.analyticspeline_name
   access_key = format("{{secrets.%s}}", osc_secret.smoothmqaccesskey.secret_name)
   secret_key = format("{{secrets.%s}}", osc_secret.smoothmqsecretkey.secret_name)
 }
 resource "osc_eyevinn_player_analytics_eventsink" "eventsink_instance" {
-  name                  = var.playeranalyticseventsinkinstancename
+  name                  = var.analyticspeline_name
   aws_access_key_id     = format("{{secrets.%s}}", osc_secret.smoothmqaccesskey.secret_name)
   aws_secret_access_key = format("{{secrets.%s}}", osc_secret.smoothmqsecretkey.secret_name)
   sqs_queue_url         = local.queue_url
   sqs_endpoint          = osc_poundifdef_smoothmq.smooth_mq_instance.instance_url
 }
 resource "osc_clickhouse_clickhouse" "clickhouse_instance" {
-  name     = var.clickhouseinstancename
-  db       = var.clickhousedbname
+  name     = var.analyticspeline_name
   user     = format("{{secrets.%s}}", osc_secret.clickhouseusername.secret_name)
   password = format("{{secrets.%s}}", osc_secret.clickhousepassword.secret_name)
 }
 resource "osc_eyevinn_player_analytics_worker" "worker_instance" {
-  name                  = var.playeranalyticsworkerinstancename
+  name                  = var.analyticspeline_name
   click_house_url       = format("{{secrets.%s}}", osc_secret.clickhouseurl.secret_name)
   sqs_queue_url         = local.queue_url
   aws_access_key_id     = format("{{secrets.%s}}", osc_secret.smoothmqaccesskey.secret_name)
