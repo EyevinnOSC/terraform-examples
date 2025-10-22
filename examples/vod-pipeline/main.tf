@@ -107,7 +107,7 @@ provider "osc" {
 
 resource "osc_secret" "miniousername" {
   service_ids  = ["minio-minio", "encore", "eyevinn-encore-packager"]
-  secret_name  = "${var.vodpipeline_name}mminiousername"
+  secret_name  = "${var.vodpipeline_name}miniousername"
   secret_value = var.minio_username
 }
 
