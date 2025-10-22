@@ -3,7 +3,7 @@ terraform {
   required_providers {
     osc = {
       source  = "registry.terraform.io/EyevinnOSC/osc"
-      version = "0.1.5"
+      version = "0.3.0"
     }
   }
 }
@@ -87,12 +87,12 @@ resource "osc_eyevinn_wrtc_egress" "this" {
 # Resource: WHIP Gateway
 ############################
 resource "osc_eyevinn_smb_whip_bridge" "this" {
-  name        = var.distribution_name
-  smb_url     = osc_eyevinn_docker_wrtc_sfu.this.instance_url
-  smb_api_key = format("{{secrets.%s}}", osc_secret.smbapikey.secret_name)
-  whip_api_key = var.whip_key
+  name              = var.distribution_name
+  smb_url           = osc_eyevinn_docker_wrtc_sfu.this.instance_url
+  smb_api_key       = format("{{secrets.%s}}", osc_secret.smbapikey.secret_name)
+  whip_api_key      = var.whip_key
   whep_endpoint_url = osc_eyevinn_wrtc_egress.this.instance_url
-  depends_on = [osc_eyevinn_docker_wrtc_sfu.this, osc_eyevinn_wrtc_egress.this]
+  depends_on        = [osc_eyevinn_docker_wrtc_sfu.this, osc_eyevinn_wrtc_egress.this]
 }
 
 ############################

@@ -3,7 +3,7 @@ terraform {
   required_providers {
     osc = {
       source  = "EyevinnOSC/osc"
-      version = "0.1.5"
+      version = "0.3.0"
     }
   }
 }
