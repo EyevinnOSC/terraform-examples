@@ -4,7 +4,7 @@ terraform {
     osc = {
       source = "registry.terraform.io/EyevinnOSC/osc"
       #source = "local/eyevinnosc/osc" 
-      version = "0.1.6"
+      version = "0.3.0"
     }
   }
 }
