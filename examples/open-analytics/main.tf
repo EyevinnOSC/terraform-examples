@@ -245,3 +245,14 @@ output "worker_instance_url" {
 output "worker_service_id" {
   value = osc_eyevinn_player_analytics_worker.worker_instance.service_id
 }
+
+## --- Grafana ---
+output "grafana_instance_url" {
+  value = osc_grafana_grafana.this.instance_url
+}
+output "grafana_external_ip" {
+  value = osc_grafana_grafana.this.external_ip
+}
+output "grafana_external_port" {
+  value = osc_grafana_grafana.this.external_port
+}
