@@ -36,4 +36,4 @@ For installing, please see: [here](https://docs.aws.amazon.com/cli/latest/usergu
    curl -X POST --json '{ "event": "init", "sessionId": "3", "timestamp": 1740411580982, "playhead": -1, "duration": -1 }' `<eventsink-URL>
    ```
    Then open the clickhouse UI via `<clickhouse-URL>`, input your credentials (`<TF_VAR_clickhouseusername>` and `<TF_VAR_clickhousepassword>`) and run `SELECT * FROM epas_default` and you should see the transaction(s).
-3. Visualize data by integrating with Grafana: https://docs.osaas.io/osaas.wiki/Solution%3A-Eyevinn-Open-Analytics.html#step-7-grafana-integration-for-analytics-pipeline
+3. Visualize data by visiting the Grafana instance created (includes auto provisioned data source and an example dashboard)
