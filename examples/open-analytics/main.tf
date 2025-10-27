@@ -71,7 +71,7 @@ variable "clickhousepassword" {
 ## --- Grafana ---
 variable "grafanadashboardurl" {
   type        = string
-  default     = "https://github.com/EyevinnOSC/terraform-examples/blob/main/examples/open-analytics/grafana-dashboards/open-analytics-example-dashboard.json"
+  default     = "https://raw.githubusercontent.com/EyevinnOSC/terraform-examples/03ebe5e08bf3ba731ddb828778194c4e6c55bd18/examples/open-analytics/grafana-dashboards/open-analytics-example-dashboard.json"
   description = "Url to grafana dashbaord json"
 }
 
