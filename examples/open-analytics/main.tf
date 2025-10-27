@@ -4,7 +4,7 @@ terraform {
     osc = {
       source = "registry.terraform.io/EyevinnOSC/osc"
       #source = "local/eyevinnosc/osc" 
-      version = "0.3.0"
+      version = "0.4.0"
     }
   }
 }
@@ -43,10 +43,8 @@ variable "analyticspeline_name" {
   description = "Name of the analytics pipeline. Lower case letters and numbers only"
 }
 
-############################
-# SmoothMQ
-############################
 
+## --- SmoothMQ ---
 variable "smoothmqaccesskey" {
   type        = string
   sensitive   = true
@@ -58,10 +56,7 @@ variable "smoothmqsecretkey" {
   description = "SmoothMQ Secret Key"
 }
 
-############################
-# ClickHouse Server
-############################
-
+## --- ClickHouse Server ---
 variable "clickhouseusername" {
   type        = string
   sensitive   = true
@@ -71,6 +66,13 @@ variable "clickhousepassword" {
   type        = string
   sensitive   = true
   description = "Clickhouse Server Password"
+}
+
+## --- Grafana ---
+variable "grafanadashboardurl" {
+  type        = string
+  default     = "https://github.com/EyevinnOSC/terraform-examples/blob/main/examples/open-analytics/grafana-dashboards/open-analytics-example-dashboard.json"
+  description = "Url to grafana dashbaord json"
 }
 
 ############################
@@ -88,12 +90,12 @@ resource "osc_secret" "smoothmqsecretkey" {
   secret_value = var.smoothmqsecretkey
 }
 resource "osc_secret" "clickhouseusername" {
-  service_ids  = ["clickhouse-clickhouse", "eyevinn-player-analytics-worker"]
+  service_ids  = ["clickhouse-clickhouse", "eyevinn-player-analytics-worker", "grafana-grafana"]
   secret_name  = "${var.analyticspeline_name}clickhouseusername"
   secret_value = var.clickhouseusername
 }
 resource "osc_secret" "clickhousepassword" {
-  service_ids  = ["clickhouse-clickhouse", "eyevinn-player-analytics-worker"]
+  service_ids  = ["clickhouse-clickhouse", "eyevinn-player-analytics-worker", "grafana-grafana"]
   secret_name  = "${var.analyticspeline_name}clickhousepassword"
   secret_value = var.clickhousepassword
 }
@@ -183,6 +185,23 @@ resource "osc_eyevinn_player_analytics_worker" "worker_instance" {
   aws_access_key_id     = format("{{secrets.%s}}", osc_secret.smoothmqaccesskey.secret_name)
   aws_secret_access_key = format("{{secrets.%s}}", osc_secret.smoothmqsecretkey.secret_name)
   sqs_endpoint          = osc_poundifdef_smoothmq.smooth_mq_instance.instance_url
+}
+
+
+resource "osc_secret" "grafanadatasource" {
+  service_ids  = ["grafana-grafana"]
+  secret_name  = "${var.analyticspeline_name}grafanadatasources"
+  secret_value = "ClickHouse:vertamedia-clickhouse-datasource:${osc_clickhouse_clickhouse.clickhouse_instance.instance_url};${var.clickhouseusername};${var.clickhousepassword}"
+  depends_on   = [osc_clickhouse_clickhouse.clickhouse_instance]
+}
+
+resource "osc_grafana_grafana" "this" {
+  depends_on         = [osc_secret.grafanadatasource]
+  name               = var.analyticspeline_name
+  anonymous_enabled  = false
+  plugins_preinstall = "vertamedia-clickhouse-datasource,grafana-clickhouse-datasource"
+  datasources        = format("{{secrets.%s}}", osc_secret.grafanadatasource.secret_name)
+  dashboard_urls     = var.grafanadashboardurl
 }
 
 ############################

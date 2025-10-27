@@ -1,0 +1,647 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "description": "Example dashboard for Open Analytics",
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 0,
+    "links": [],
+    "panels": [
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 5,
+            "panels": [],
+            "title": "Overview",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ClickHouse"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 1
+            },
+            "id": 3,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "12.2.1",
+            "targets": [
+                {
+                    "adHocFilters": [],
+                    "adHocValuesQuery": "",
+                    "add_metadata": true,
+                    "contextWindowSize": "10",
+                    "datasource": {
+                        "type": "vertamedia-clickhouse-datasource",
+                        "uid": "ClickHouse"
+                    },
+                    "editorMode": "builder",
+                    "extrapolate": true,
+                    "format": "table",
+                    "formattedQuery": "/* grafana dashboard='countingevents', user=1 */\nSELECT\n  COUNT(DISTINCT sessionId) AS \"Unique Sessions\"\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime(1761544748780 / 1000)\n  AND timestamp <= toDateTime(1761566348780 / 1000)",
+                    "interval": "",
+                    "intervalFactor": 1,
+                    "nullifySparse": false,
+                    "query": "SELECT\n  COUNT(DISTINCT sessionId) AS \"Unique Sessions\"\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime($__from / 1000)\n  AND timestamp <= toDateTime($__to / 1000)",
+                    "rawQuery": "/* grafana dashboard=counting events, user=1 */\nSELECT\n  COUNT(DISTINCT sessionId) AS \"Unique Sessions\"\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime(1746177873548 / 1000)\n  AND timestamp <= toDateTime(1746181473548 / 1000)",
+                    "refId": "A",
+                    "round": "0s",
+                    "skip_comments": true,
+                    "useWindowFuncForMacros": true
+                }
+            ],
+            "title": "Sessions",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ClickHouse"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        }
+                    },
+                    "mappings": []
+                },
+                "overrides": [
+                    {
+                        "__systemRef": "hideSeriesFrom",
+                        "matcher": {
+                            "id": "byNames",
+                            "options": {
+                                "mode": "exclude",
+                                "names": [
+                                    "80+"
+                                ],
+                                "prefix": "All except:",
+                                "readOnly": true
+                            }
+                        },
+                        "properties": []
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 1
+            },
+            "id": 4,
+            "options": {
+                "displayLabels": [],
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "pieType": "pie",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": true
+                },
+                "sort": "desc",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "multi",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.2.1",
+            "targets": [
+                {
+                    "adHocFilters": [],
+                    "adHocValuesQuery": "",
+                    "add_metadata": true,
+                    "contextWindowSize": "10",
+                    "datasource": {
+                        "type": "vertamedia-clickhouse-datasource",
+                        "uid": "ClickHouse"
+                    },
+                    "editorMode": "builder",
+                    "extrapolate": true,
+                    "format": "table",
+                    "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+                    "interval": "",
+                    "intervalFactor": 1,
+                    "query": "SELECT\n  deviceType   AS category,\n  COUNT(*)     AS value\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime($__from / 1000)\n  AND timestamp <= toDateTime($__to   / 1000)\n  AND event = 'metadata'\n  AND deviceType IS NOT NULL\nGROUP BY\n  deviceType\n",
+                    "rawQuery": "/* grafana dashboard=counting events, user=1 */\nSELECT\n  deviceType   AS category,\n  COUNT(*)     AS value\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime(1746153146537 / 1000)\n  AND timestamp <= toDateTime(1746196346537   / 1000)\n  AND event = 'metadata'\n  AND deviceType IS NOT NULL\n\nGROUP BY\n  deviceType",
+                    "refId": "A",
+                    "round": "0s",
+                    "skip_comments": true,
+                    "useWindowFuncForMacros": true
+                }
+            ],
+            "title": "Device Type",
+            "transparent": true,
+            "type": "piechart"
+        },
+        {
+            "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ClickHouse"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "__systemRef": "hideSeriesFrom",
+                        "matcher": {
+                            "id": "byNames",
+                            "options": {
+                                "mode": "exclude",
+                                "names": [
+                                    "seeking"
+                                ],
+                                "prefix": "All except:",
+                                "readOnly": true
+                            }
+                        },
+                        "properties": []
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 9
+            },
+            "id": 2,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.2.1",
+            "targets": [
+                {
+                    "adHocFilters": [],
+                    "adHocValuesQuery": "",
+                    "add_metadata": true,
+                    "contextWindowSize": "10",
+                    "datasource": {
+                        "type": "vertamedia-clickhouse-datasource",
+                        "uid": "ClickHouse"
+                    },
+                    "editorMode": "builder",
+                    "extrapolate": true,
+                    "format": "table",
+                    "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+                    "interval": "",
+                    "intervalFactor": 1,
+                    "query": "SELECT\n  toStartOfInterval(toDateTime(timestamp), INTERVAL 5 MINUTE) AS time,\n  'initiated_sessions' AS metric,\n  COUNT(DISTINCT sessionId) AS value\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime($__from / 1000)\n  AND timestamp <= toDateTime($__to / 1000)\n  AND event = 'init'\nGROUP BY\n  time,\n  metric\nORDER BY\n  time",
+                    "rawQuery": "/* grafana dashboard=counting events, user=1 */\nSELECT\n  toStartOfInterval(toDateTime(timestamp), INTERVAL 5 MINUTE) AS time,\n  'initiated_sessions' AS metric,\n  COUNT(DISTINCT sessionId) AS value\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime(1746182531238 / 1000)\n  AND timestamp <= toDateTime(1746183431238 / 1000)\n  AND eventT = 'init'\nGROUP BY\n  time,\n  metric\nORDER BY\n  time",
+                    "refId": "A",
+                    "round": "0s",
+                    "showFormattedSQL": true,
+                    "skip_comments": true,
+                    "useWindowFuncForMacros": true
+                }
+            ],
+            "title": "Initiated Sessions (5mins)",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ClickHouse"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisGridShow": true,
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.1,
+                        "drawStyle": "bars",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "showValues": false,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "normal"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 9
+            },
+            "id": 1,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.2.1",
+            "targets": [
+                {
+                    "adHocFilters": [],
+                    "adHocValuesQuery": "",
+                    "add_metadata": true,
+                    "contextWindowSize": "10",
+                    "datasource": {
+                        "type": "vertamedia-clickhouse-datasource",
+                        "uid": "ClickHouse"
+                    },
+                    "editorMode": "builder",
+                    "extrapolate": true,
+                    "format": "time_series",
+                    "formattedQuery": "/* grafana dashboard='Open Analytics Dashboard', user=1 */\nSELECT\n  toStartOfMinute(timestamp) AS time,\n  event,\n  count(*) AS event_count\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime(1761547323915 / 1000)\n  AND timestamp <= toDateTime(1761568923915 / 1000)\nGROUP BY time, event\nORDER BY time ASC, event",
+                    "interval": "",
+                    "intervalFactor": 1,
+                    "nullifySparse": false,
+                    "query": "SELECT\n  toStartOfMinute(timestamp) AS time,\n  event,\n  count(*) AS event_count\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime($__from / 1000)\n  AND timestamp <= toDateTime($__to / 1000)\nGROUP BY time, event\nORDER BY time ASC, event\n",
+                    "rawQuery": "/* grafana dashboard=counting events, user=1 */\nSELECT\n  toStartOfMinute(timestamp) AS t,\n  event,\n  count(*) AS event_count\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime(1746180516436 / 1000)\n  AND timestamp <= toDateTime(1746181416436 / 1000)\nGROUP BY t, event\nORDER BY t ASC, event",
+                    "refId": "A",
+                    "round": "0s",
+                    "skip_comments": true,
+                    "useWindowFuncForMacros": true
+                }
+            ],
+            "title": "Events Type",
+            "type": "timeseries"
+        },
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 17
+            },
+            "id": 6,
+            "panels": [],
+            "title": "Follow session ($session)",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "vertamedia-clickhouse-datasource",
+                "uid": "ClickHouse"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "__systemRef": "hideSeriesFrom",
+                        "matcher": {
+                            "id": "byNames",
+                            "options": {
+                                "mode": "exclude",
+                                "names": [
+                                    "seeking"
+                                ],
+                                "prefix": "All except:",
+                                "readOnly": true
+                            }
+                        },
+                        "properties": []
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "sessionId"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 260
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "timestamp"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 199
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 24,
+                "w": 24,
+                "x": 0,
+                "y": 18
+            },
+            "id": 7,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.2.1",
+            "targets": [
+                {
+                    "adHocFilters": [],
+                    "adHocValuesQuery": "",
+                    "add_metadata": true,
+                    "contextWindowSize": "10",
+                    "datasource": {
+                        "type": "vertamedia-clickhouse-datasource",
+                        "uid": "ClickHouse"
+                    },
+                    "editorMode": "builder",
+                    "extrapolate": true,
+                    "format": "table",
+                    "formattedQuery": "/* grafana dashboard='Open Analytics Dashboard', user=1 */\nSELECT *\nFROM default.epas_default\nWHERE sessionId = 'web-player-demo-1761566291637'\nORDER BY timestamp DESC",
+                    "interval": "",
+                    "intervalFactor": 1,
+                    "nullifySparse": false,
+                    "query": "SELECT *\nFROM default.epas_default\nWHERE sessionId = $session\nORDER BY timestamp DESC",
+                    "rawQuery": "/* grafana dashboard=counting events, user=1 */\nSELECT\n  toStartOfInterval(toDateTime(timestamp), INTERVAL 5 MINUTE) AS time,\n  'initiated_sessions' AS metric,\n  COUNT(DISTINCT sessionId) AS value\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime(1746182531238 / 1000)\n  AND timestamp <= toDateTime(1746183431238 / 1000)\n  AND eventT = 'init'\nGROUP BY\n  time,\n  metric\nORDER BY\n  time",
+                    "refId": "A",
+                    "round": "0s",
+                    "showFormattedSQL": true,
+                    "showHelp": true,
+                    "skip_comments": true,
+                    "useWindowFuncForMacros": true
+                }
+            ],
+            "title": "Event Details for Session",
+            "transformations": [
+                {
+                    "id": "organize",
+                    "options": {
+                        "excludeByName": {
+                            "event_date": true,
+                            "event_hour": true
+                        },
+                        "includeByName": {},
+                        "indexByName": {
+                            "contentId": 6,
+                            "deviceId": 8,
+                            "deviceModel": 9,
+                            "deviceType": 10,
+                            "duration": 4,
+                            "event": 2,
+                            "event_date": 12,
+                            "event_hour": 13,
+                            "live": 5,
+                            "payload": 11,
+                            "playhead": 3,
+                            "sessionId": 1,
+                            "timestamp": 0,
+                            "userId": 7
+                        },
+                        "renameByName": {}
+                    }
+                }
+            ],
+            "type": "table"
+        }
+    ],
+    "preload": false,
+    "schemaVersion": 42,
+    "tags": [],
+    "templating": {
+        "list": [
+            {
+                "current": {
+                    "text": "web-player-demo-1761556492214",
+                    "value": "web-player-demo-1761556492214"
+                },
+                "definition": "SELECT DISTINCT sessionId FROM default.epas_default",
+                "label": "Session",
+                "name": "session",
+                "options": [],
+                "query": {
+                    "adHocFilters": [],
+                    "adHocValuesQuery": "",
+                    "add_metadata": true,
+                    "contextWindowSize": "10",
+                    "datasourceMode": "Variable",
+                    "editorMode": "builder",
+                    "extrapolate": true,
+                    "format": "time_series",
+                    "formattedQuery": "/* grafana dashboard='Open Analytics Dashboard', user=1 */\nSELECT DISTINCT sessionId FROM default.epas_default",
+                    "interval": "",
+                    "intervalFactor": 1,
+                    "nullifySparse": false,
+                    "query": "SELECT DISTINCT sessionId FROM default.epas_default",
+                    "round": "0s",
+                    "skip_comments": true,
+                    "useWindowFuncForMacros": true
+                },
+                "refresh": 2,
+                "regex": "",
+                "type": "query"
+            }
+        ]
+    },
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "Open Analytics Dashboard",
+    "uid": "aekgm1nvquozkd",
+    "version": 34
+}
