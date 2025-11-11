@@ -62,11 +62,11 @@ locals {
 }
 
 locals {
-  smb_api_key_final = var.smb_api_key != null ? var.smb_api_key : random_string.smb_api_key.result
+  smb_api_key_final = var.smb_api_key != null && var.smb_api_key != "null" ? var.smb_api_key : random_string.smb_api_key.result
 }
 
 locals {
-  db_admin_password_final = var.db_admin_password != null ? var.db_admin_password : random_string.db_admin_password.result
+  db_admin_password_final = var.db_admin_password != null && var.smb_api_key != "null" ? var.db_admin_password : random_string.db_admin_password.result
 }
 
 ############################
