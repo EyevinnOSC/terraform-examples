@@ -29,7 +29,7 @@ variable "osc_environment" {
 
 variable "intercom_name" {
   type        = string
-  default     = "mysecretintercom"
+  default     = "myintercom"
   description = "Name of the intercom system. Lower case letters and numbers only"
 }
 
@@ -62,11 +62,11 @@ locals {
 }
 
 locals {
-  smb_api_key_final = var.smb_api_key != null && var.smb_api_key != "null" ? var.smb_api_key : random_string.smb_api_key.result
+  smb_api_key_final = var.smb_api_key != null && var.smb_api_key != "null" ? var.smb_api_key : random_password.smb_api_key.result
 }
 
 locals {
-  db_admin_password_final = var.db_admin_password != null && var.smb_api_key != "null" ? var.db_admin_password : random_string.db_admin_password.result
+  db_admin_password_final = var.db_admin_password != null && var.smb_api_key != "null" ? var.db_admin_password : random_password.db_admin_password.result
 }
 
 ############################
@@ -79,14 +79,14 @@ provider "osc" {
 
 
 ############################
-# Resource: Random strings
+# Resource: Random passwords
 ############################
-resource "random_string" "smb_api_key" {
+resource "random_password" "smb_api_key" {
   length  = 16
   special = false
 }
 
-resource "random_string" "db_admin_password" {
+resource "random_password" "db_admin_password" {
   length  = 16
   special = false
 }
