@@ -29,23 +29,25 @@ variable "osc_environment" {
 
 variable "intercom_name" {
   type        = string
-  default     = "myintercom"
+  default     = "mysecretintercom"
   description = "Name of the intercom system. Lower case letters and numbers only"
 }
 
 # Intercom SMB API key. Sensitive
 variable "smb_api_key" {
   type        = string
+  default     = null
   sensitive   = true
-  description = "Symphony Media Bridge API key"
+  description = "Set the Symphony Media Bridge API key. Leave empty to have it auto-generated"
 }
 
 ## --- Intercom DB ---
 # Password for admin user. Sensitive
 variable "db_admin_password" {
   type        = string
+  default     = null
   sensitive   = true
-  description = "The DB password"
+  description = "Set the the database password. Leave empty to have it auto-generated"
 }
 
 # Name of the actual database to create
@@ -59,6 +61,14 @@ locals {
   base_host = trimprefix("${osc_apache_couchdb.this.instance_url}", "https://")
 }
 
+locals {
+  smb_api_key_final = var.smb_api_key != null && var.smb_api_key != "null" ? var.smb_api_key : random_string.smb_api_key.result
+}
+
+locals {
+  db_admin_password_final = var.db_admin_password != null && var.smb_api_key != "null" ? var.db_admin_password : random_string.db_admin_password.result
+}
+
 ############################
 # Provider
 ############################
@@ -66,6 +76,21 @@ provider "osc" {
   pat         = var.osc_pat
   environment = var.osc_environment
 }
+
+
+############################
+# Resource: Random strings
+############################
+resource "random_string" "smb_api_key" {
+  length  = 16
+  special = false
+}
+
+resource "random_string" "db_admin_password" {
+  length  = 16
+  special = false
+}
+
 
 ############################
 # Resource: Secrets
@@ -80,19 +105,19 @@ resource "osc_secret" "token" {
 resource "osc_secret" "apikey" {
   service_ids  = ["eyevinn-intercom-manager", "eyevinn-docker-wrtc-sfu"]
   secret_name  = "${var.intercom_name}smbapikey"
-  secret_value = var.smb_api_key
+  secret_value = local.smb_api_key_final
 }
 
 resource "osc_secret" "dbadminpassword" {
   service_ids  = ["apache-couchdb"]
   secret_name  = "${var.intercom_name}dbadminpass"
-  secret_value = var.db_admin_password
+  secret_value = local.db_admin_password_final
 }
 
 resource "osc_secret" "dburl" {
   service_ids  = ["eyevinn-intercom-manager"]
   secret_name  = "${var.intercom_name}dburl"
-  secret_value = "https://admin:${var.db_admin_password}@${local.base_host}/${var.db_name}"
+  secret_value = "https://admin:${local.db_admin_password_final}@${local.base_host}/${var.db_name}"
 }
 
 ############################
