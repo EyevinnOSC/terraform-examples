@@ -38,7 +38,7 @@ variable "smb_api_key" {
   type        = string
   default     = null
   sensitive   = true
-  description = "Set the Symphony Media Bridge API key. Leave blank to have it auto-generated"
+  description = "Set the Symphony Media Bridge API key. Leave empty to have it auto-generated"
 }
 
 ## --- Intercom DB ---
@@ -47,7 +47,7 @@ variable "db_admin_password" {
   type        = string
   default     = null
   sensitive   = true
-  description = "Set the the DB password. Leave blank to have it auto-generated"
+  description = "Set the the database password. Leave empty to have it auto-generated"
 }
 
 # Name of the actual database to create
