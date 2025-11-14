@@ -106,18 +106,39 @@ resource "osc_secret" "apikey" {
   service_ids  = ["eyevinn-intercom-manager", "eyevinn-docker-wrtc-sfu"]
   secret_name  = "${var.intercom_name}smbapikey"
   secret_value = local.smb_api_key_final
+  
+  # Force recreation when SFU instance changes
+  lifecycle {
+    replace_triggered_by = [
+      osc_eyevinn_docker_wrtc_sfu.this
+    ]
+  }
 }
 
 resource "osc_secret" "dbadminpassword" {
   service_ids  = ["apache-couchdb"]
   secret_name  = "${var.intercom_name}dbadminpass"
   secret_value = local.db_admin_password_final
+  
+  # Force recreation when CouchDB instance changes
+  lifecycle {
+    replace_triggered_by = [
+      osc_apache_couchdb.this
+    ]
+  }
 }
 
 resource "osc_secret" "dburl" {
   service_ids  = ["eyevinn-intercom-manager"]
   secret_name  = "${var.intercom_name}dburl"
   secret_value = "https://admin:${local.db_admin_password_final}@${local.base_host}/${var.db_name}"
+  
+  # Force recreation when CouchDB instance changes
+  lifecycle {
+    replace_triggered_by = [
+      osc_apache_couchdb.this
+    ]
+  }
 }
 
 ############################
