@@ -92,6 +92,7 @@ resource "random_password" "db_admin_password" {
 }
 
 
+
 ############################
 # Resource: Secrets
 ############################
@@ -107,11 +108,8 @@ resource "osc_secret" "apikey" {
   secret_name  = "${var.intercom_name}smbapikey"
   secret_value = local.smb_api_key_final
   
-  # Force recreation when SFU instance changes
   lifecycle {
-    replace_triggered_by = [
-      osc_eyevinn_docker_wrtc_sfu.this
-    ]
+    create_before_destroy = true
   }
 }
 
@@ -120,11 +118,8 @@ resource "osc_secret" "dbadminpassword" {
   secret_name  = "${var.intercom_name}dbadminpass"
   secret_value = local.db_admin_password_final
   
-  # Force recreation when CouchDB instance changes
   lifecycle {
-    replace_triggered_by = [
-      osc_apache_couchdb.this
-    ]
+    create_before_destroy = true
   }
 }
 
@@ -133,11 +128,8 @@ resource "osc_secret" "dburl" {
   secret_name  = "${var.intercom_name}dburl"
   secret_value = "https://admin:${local.db_admin_password_final}@${local.base_host}/${var.db_name}"
   
-  # Force recreation when CouchDB instance changes
   lifecycle {
-    replace_triggered_by = [
-      osc_apache_couchdb.this
-    ]
+    create_before_destroy = true
   }
 }
 
