@@ -48,31 +48,31 @@ variable "analyticspeline_name" {
 variable "smoothmqaccesskey" {
   type        = string
   sensitive   = true
-  description = "SmoothMQ Access Key"
+  description = "Set the SmoothMQ Access Key"
 }
 variable "smoothmqsecretkey" {
   type        = string
   sensitive   = true
-  description = "SmoothMQ Secret Key"
+  description = "Set the SmoothMQ Secret Key"
 }
 
 ## --- ClickHouse Server ---
 variable "clickhouseusername" {
   type        = string
   sensitive   = true
-  description = "ClickHouse Server Username"
+  description = "Set the ClickHouse Server Username"
 }
 variable "clickhousepassword" {
   type        = string
   sensitive   = true
-  description = "Clickhouse Server Password"
+  description = "Set the Clickhouse Server Password"
 }
 
 ## --- Grafana ---
 variable "grafanadashboardurl" {
   type        = string
-  default     = "https://raw.githubusercontent.com/EyevinnOSC/terraform-examples/03ebe5e08bf3ba731ddb828778194c4e6c55bd18/examples/open-analytics/grafana-dashboards/open-analytics-example-dashboard.json"
-  description = "Url to grafana dashbaord json"
+  default     = "https://raw.githubusercontent.com/EyevinnOSC/terraform-examples/refs/heads/main/examples/open-analytics/grafana-dashboards/open-analytics-example-dashboard.json"
+  description = "Url to Grafana dashboard JSON to be installed"
 }
 
 ############################
