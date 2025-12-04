@@ -35,8 +35,9 @@ variable "penpot_name" {
 
 variable "database_password" {
   type        = string
+  default     = null
   sensitive   = true
-  description = "PostgreSQL database password"
+  description = "Set the PostgreSQL database password. Leave empty to have it auto-generated"
 }
 
 ############################
@@ -48,13 +49,29 @@ provider "osc" {
 }
 
 ############################
+# Resource: Random passwords
+############################
+resource "random_password" "db_password" {
+  length  = 16
+  special = false
+}
+
+locals {
+  db_password_final = var.database_password != null && var.database_password != "null" ? var.database_password : random_password.db_password.result
+}
+
+############################
 # Resource: Secrets
 ############################
 
 resource "osc_secret" "dbpwd" {
   service_ids  = ["penpot-penpot", "birme-osc-postgresql"]
   secret_name  = "${var.penpot_name}dbpwd"
-  secret_value = var.database_password
+  secret_value = local.db_password_final
+  
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 ############################
