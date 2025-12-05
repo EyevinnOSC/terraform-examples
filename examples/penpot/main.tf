@@ -40,6 +40,10 @@ variable "database_password" {
   description = "Set the PostgreSQL database password. Leave empty to have it auto-generated"
 }
 
+locals {
+  db_password_final = var.database_password != null && var.database_password != "null" ? var.database_password : random_password.db_password.result
+}
+
 ############################
 # Provider
 ############################
@@ -54,10 +58,6 @@ provider "osc" {
 resource "random_password" "db_password" {
   length  = 16
   special = false
-}
-
-locals {
-  db_password_final = var.database_password != null && var.database_password != "null" ? var.database_password : random_password.db_password.result
 }
 
 ############################
