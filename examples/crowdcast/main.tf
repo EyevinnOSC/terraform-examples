@@ -36,14 +36,24 @@ variable "crowdcast_name" {
 # Symphony Media Bridge API key. Sensitive
 variable "smb_api_key" {
   type        = string
+  default     = null
   sensitive   = true
-  description = "Symphony Media Bridge API key"
+  description = "Set the Symphony Media Bridge API key. Leave empty to have it auto-generated"
 }
 
 variable "whip_key" {
   type        = string
+  default     = null
   sensitive   = true
-  description = "Ingest key"
+  description = "Set the ingest key. Leave empty to have it auto-generated"
+}
+
+locals {
+  smb_api_key_final = var.smb_api_key != null && var.smb_api_key != "null" ? var.smb_api_key : random_password.smb_api_key.result
+}
+
+locals {
+  whip_key_final = var.whip_key != null && var.whip_key != "null" ? var.whip_key : random_password.whip_key.result
 }
 
 ############################
@@ -55,13 +65,31 @@ provider "osc" {
 }
 
 ############################
+# Resource: Random passwords
+############################
+resource "random_password" "smb_api_key" {
+  length  = 16
+  special = false
+}
+
+resource "random_password" "whip_key" {
+  length  = 16
+  special = false
+}
+
+
+############################
 # Resource: Secrets
 ############################
 
 resource "osc_secret" "smbapikey" {
   service_ids  = ["eyevinn-wrtc-egress", "eyevinn-docker-wrtc-sfu", "eyevinn-smb-whip-bridge"]
   secret_name  = "${var.crowdcast_name}smbapikey"
-  secret_value = var.smb_api_key
+  secret_value = local.smb_api_key_final
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 ############################
@@ -90,7 +118,7 @@ resource "osc_eyevinn_smb_whip_bridge" "this" {
   name              = var.crowdcast_name
   smb_url           = osc_eyevinn_docker_wrtc_sfu.this.instance_url
   smb_api_key       = format("{{secrets.%s}}", osc_secret.smbapikey.secret_name)
-  whip_api_key      = var.whip_key
+  whip_api_key      = local.whip_key_final
   whep_endpoint_url = osc_eyevinn_wrtc_egress.this.instance_url
   depends_on        = [osc_eyevinn_docker_wrtc_sfu.this, osc_eyevinn_wrtc_egress.this]
 }
@@ -102,7 +130,7 @@ resource "osc_eyevinn_join_live" "this" {
   name             = var.crowdcast_name
   whip_gateway_url = osc_eyevinn_smb_whip_bridge.this.instance_url
   whep_gateway_url = osc_eyevinn_wrtc_egress.this.instance_url
-  whip_auth_key    = var.whip_key
+  whip_auth_key    = local.whip_key_final
   depends_on       = [osc_eyevinn_smb_whip_bridge.this, osc_eyevinn_wrtc_egress.this]
 }
 
