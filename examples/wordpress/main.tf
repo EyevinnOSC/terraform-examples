@@ -35,8 +35,9 @@ variable "wordpress_name" {
 
 variable "db_admin_password" {
   type        = string
+  default     = null
   sensitive   = true
-  description = "MariaDB admin password"
+  description = "Set the MariaDB admin password. Leave empty to have it auto-generated"
 }
 
 variable "db_username" {
@@ -47,8 +48,17 @@ variable "db_username" {
 
 variable "db_password" {
   type        = string
+  default     = null
   sensitive   = true
-  description = "MariaDB user password"
+  description = "Set the MariaDB user password. Leave empty to have it auto-generated"
+}
+
+locals {
+  db_admin_password_final = var.db_admin_password != null && var.db_admin_password != "null" ? var.db_admin_password : random_password.db_admin_password.result
+}
+
+locals {
+  db_password_final = var.db_password != null && var.db_password != "null" ? var.db_password : random_password.db_password.result
 }
 
 ############################
@@ -60,13 +70,31 @@ provider "osc" {
 }
 
 ############################
+# Resource: Random passwords
+############################
+resource "random_password" "db_admin_password" {
+  length  = 16
+  special = false
+}
+
+resource "random_password" "db_password" {
+  length  = 16
+  special = false
+}
+
+
+############################
 # Resource: Secrets
 ############################
 
 resource "osc_secret" "dbadminpwd" {
   service_ids  = ["linuxserver-docker-mariadb"]
   secret_name  = "${var.wordpress_name}dbadminpwd"
-  secret_value = var.db_admin_password
+  secret_value = local.db_admin_password_final
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "osc_secret" "dbusername" {
@@ -78,7 +106,11 @@ resource "osc_secret" "dbusername" {
 resource "osc_secret" "dbuserpwd" {
   service_ids  = ["linuxserver-docker-mariadb", "wordpress-wordpress"]
   secret_name  = "${var.wordpress_name}dbuserpwd"
-  secret_value = var.db_password
+  secret_value = local.db_password_final
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 ############################
