@@ -2,8 +2,8 @@ terraform {
   required_version = ">= 1.6.0"
   required_providers {
     osc = {
-      source  = "EyevinnOSC/osc"
-      version = "0.4.0"
+      source  = "registry.terraform.io/EyevinnOSC/osc"
+      version = "0.5.0"
     }
   }
 }
@@ -39,12 +39,20 @@ variable "minio_username" {
   type        = string
   sensitive   = true
   description = "Set the minio user name"
+  validation {
+    condition     = length(var.minio_username) >= 3
+    error_message = "Name must be at least 3 characters long."
+  }
 }
 
 variable "minio_password" {
   type        = string
   sensitive   = true
   description = "Set the minio password"
+  validation {
+    condition     = length(var.minio_password) >= 8
+    error_message = "Password must be at least 8 characters long."
+  }
 }
 
 variable "encore_bucket" {
@@ -84,10 +92,10 @@ variable "sgai_ad_proxy_insertion_mode" {
   description = "Insertion mode. One of [dynamic,static]"
 }
 
-variable "sgai_ad_proxy_source_origin_url" {
+variable "sgai_ad_proxy_source_origin_host" {
   type        = string
-  default     = "https://somehost/playlist.m3u8"
-  description = "The url to the oringal source stream (e.g. https://<some_host>/path/playlist.m3u8). Not required when using the hls test source"
+  default     = "https://somehost"
+  description = "The url to the original source host (e.g. https://<some_host>/path/playlist.m3u8). Not required when using the hls test source"
 }
 
 variable "sgai_ad_proxy_vast_query_string" {
@@ -262,6 +270,7 @@ resource "osc_eyevinn_encore_packager" "this" {
   aws_region            = osc_encore.this.s3_region
   s3_endpoint_url       = osc_minio_minio.this.instance_url
   redis_queue           = var.encore_packager_queue
+  skip_packaging        = false
 
   depends_on = [osc_secret.redis_url, osc_minio_minio.this, osc_eyevinn_ad_normalizer.this]
 
@@ -275,7 +284,7 @@ resource "osc_eyevinn_sgai_ad_proxy" "this" {
 
   insertion_mode = var.sgai_ad_proxy_insertion_mode
   name           = var.sgai_name
-  origin_url     = var.create_hls_test_source ? format("%s/loop/master.m3u8", osc_eyevinn_docker_testsrc_hls_live.this[0].instance_url) : var.sgai_ad_proxy_source_origin_url
+  origin_host    = var.create_hls_test_source ? osc_eyevinn_docker_testsrc_hls_live.this[0].instance_url : var.sgai_ad_proxy_source_origin_host
   vast_endpoint  = "${osc_eyevinn_ad_normalizer.this.instance_url}${var.sgai_ad_proxy_vast_query_string}"
 }
 
