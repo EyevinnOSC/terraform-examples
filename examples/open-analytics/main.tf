@@ -124,25 +124,32 @@ resource "null_resource" "create_queue" {
       ${osc_poundifdef_smoothmq.smooth_mq_instance.name}
     EOT
   }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "rm -f ${path.module}/queue_output.json"
+  }
 }
 
 ############################
-# Storage 
+# Storage
 ############################
-# used to store the queue name created by aws
-data "local_file" "queue_output" {
-  filename   = "${path.module}/queue_output.json"
+# Read the queue URL from file if it exists, otherwise return empty (for destroy operations)
+# Using external data source instead of local_file to handle missing file gracefully
+data "external" "queue_info" {
+  program = ["bash", "-c", "if [ -f '${path.module}/queue_output.json' ]; then cat '${path.module}/queue_output.json'; else echo '{\"QueueUrl\": \"\"}'; fi"]
+
   depends_on = [null_resource.create_queue]
 }
 locals {
-  queue_url       = jsondecode(data.local_file.queue_output.content).QueueUrl
+  queue_url       = data.external.queue_info.result.QueueUrl
   clickhouse_host = replace(osc_clickhouse_clickhouse.clickhouse_instance.instance_url, "https://", "")
 }
 
 
 ## polling waiting for queue to be ready
 resource "null_resource" "wait_for_queue" {
-  depends_on = [local.queue_url]
+  depends_on = [data.external.queue_info]
   provisioner "local-exec" {
     environment = {
       AWS_ACCESS_KEY_ID     = var.smoothmqaccesskey
