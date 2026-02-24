@@ -1,7 +1,12 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 QUEUE_URL="$1"
 ENDPOINT_URL="$2"
+
+if [ -z "$QUEUE_URL" ] || [ -z "$ENDPOINT_URL" ]; then
+  echo "Usage: wait_for_queue.sh <queue_url> <endpoint_url>" >&2
+  exit 1
+fi
 
 i=1
 while [ $i -le 30 ]; do
@@ -17,5 +22,5 @@ while [ $i -le 30 ]; do
   sleep 5
 done
 
-echo "Queue not ready in time" >&2
+echo "FATAL: Queue not ready after 150 seconds" >&2
 exit 1
