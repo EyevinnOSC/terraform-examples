@@ -4,7 +4,7 @@ terraform {
     osc = {
       source = "registry.terraform.io/EyevinnOSC/osc"
       #source = "local/eyevinnosc/osc" 
-      version = "0.4.0"
+      version = "0.6.0"
     }
   }
 }
@@ -117,9 +117,9 @@ resource "null_resource" "create_queue" {
       AWS_ACCESS_KEY_ID     = var.smoothmqaccesskey
       AWS_SECRET_ACCESS_KEY = var.smoothmqsecretkey
     }
-    interpreter = ["/bin/bash", "-c"]
+    interpreter = ["/bin/sh", "-c"]
     command     = <<EOT
-      bash ${path.module}/scripts/create_queue.sh \
+      sh ${path.module}/scripts/create_queue.sh \
       ${osc_poundifdef_smoothmq.smooth_mq_instance.instance_url} \
       ${osc_poundifdef_smoothmq.smooth_mq_instance.name}
     EOT
@@ -137,7 +137,7 @@ resource "null_resource" "create_queue" {
 # Read the queue URL from file if it exists, otherwise return empty (for destroy operations)
 # Using external data source instead of local_file to handle missing file gracefully
 data "external" "queue_info" {
-  program = ["bash", "-c", "if [ -f '${path.module}/queue_output.json' ]; then cat '${path.module}/queue_output.json'; else echo '{\"QueueUrl\": \"\"}'; fi"]
+  program = ["sh", "-c", "if [ -f '${path.module}/queue_output.json' ]; then cat '${path.module}/queue_output.json'; else echo '{\"QueueUrl\": \"\"}'; fi"]
 
   depends_on = [null_resource.create_queue]
 }
@@ -155,9 +155,9 @@ resource "null_resource" "wait_for_queue" {
       AWS_ACCESS_KEY_ID     = var.smoothmqaccesskey
       AWS_SECRET_ACCESS_KEY = var.smoothmqsecretkey
     }
-    interpreter = ["/bin/bash", "-c"]
+    interpreter = ["/bin/sh", "-c"]
     command     = <<EOT
-      bash ${path.module}/scripts/wait_for_queue.sh \
+      sh ${path.module}/scripts/wait_for_queue.sh \
         ${local.queue_url} \
         ${osc_poundifdef_smoothmq.smooth_mq_instance.instance_url}
     EOT
