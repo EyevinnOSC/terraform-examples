@@ -100,12 +100,10 @@
                     "editorMode": "builder",
                     "extrapolate": true,
                     "format": "table",
-                    "formattedQuery": "/* grafana dashboard='countingevents', user=1 */\nSELECT\n  COUNT(DISTINCT sessionId) AS \"Unique Sessions\"\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime(1761544748780 / 1000)\n  AND timestamp <= toDateTime(1761566348780 / 1000)",
                     "interval": "",
                     "intervalFactor": 1,
                     "nullifySparse": false,
                     "query": "SELECT\n  COUNT(DISTINCT sessionId) AS \"Unique Sessions\"\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime($__from / 1000)\n  AND timestamp <= toDateTime($__to / 1000)",
-                    "rawQuery": "/* grafana dashboard=counting events, user=1 */\nSELECT\n  COUNT(DISTINCT sessionId) AS \"Unique Sessions\"\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime(1746177873548 / 1000)\n  AND timestamp <= toDateTime(1746181473548 / 1000)",
                     "refId": "A",
                     "round": "0s",
                     "skip_comments": true,
@@ -134,23 +132,7 @@
                     },
                     "mappings": []
                 },
-                "overrides": [
-                    {
-                        "__systemRef": "hideSeriesFrom",
-                        "matcher": {
-                            "id": "byNames",
-                            "options": {
-                                "mode": "exclude",
-                                "names": [
-                                    "80+"
-                                ],
-                                "prefix": "All except:",
-                                "readOnly": true
-                            }
-                        },
-                        "properties": []
-                    }
-                ]
+                "overrides": []
             },
             "gridPos": {
                 "h": 8,
@@ -195,11 +177,9 @@
                     "editorMode": "builder",
                     "extrapolate": true,
                     "format": "table",
-                    "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
                     "interval": "",
                     "intervalFactor": 1,
                     "query": "SELECT\n  deviceType   AS category,\n  COUNT(*)     AS value\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime($__from / 1000)\n  AND timestamp <= toDateTime($__to   / 1000)\n  AND event = 'metadata'\n  AND deviceType IS NOT NULL\nGROUP BY\n  deviceType\n",
-                    "rawQuery": "/* grafana dashboard=counting events, user=1 */\nSELECT\n  deviceType   AS category,\n  COUNT(*)     AS value\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime(1746153146537 / 1000)\n  AND timestamp <= toDateTime(1746196346537   / 1000)\n  AND event = 'metadata'\n  AND deviceType IS NOT NULL\n\nGROUP BY\n  deviceType",
                     "refId": "A",
                     "round": "0s",
                     "skip_comments": true,
@@ -252,23 +232,7 @@
                         ]
                     }
                 },
-                "overrides": [
-                    {
-                        "__systemRef": "hideSeriesFrom",
-                        "matcher": {
-                            "id": "byNames",
-                            "options": {
-                                "mode": "exclude",
-                                "names": [
-                                    "seeking"
-                                ],
-                                "prefix": "All except:",
-                                "readOnly": true
-                            }
-                        },
-                        "properties": []
-                    }
-                ]
+                "overrides": []
             },
             "gridPos": {
                 "h": 8,
@@ -313,11 +277,9 @@
                     "editorMode": "builder",
                     "extrapolate": true,
                     "format": "table",
-                    "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
                     "interval": "",
                     "intervalFactor": 1,
                     "query": "SELECT\n  toStartOfInterval(toDateTime(timestamp), INTERVAL 5 MINUTE) AS time,\n  'initiated_sessions' AS metric,\n  COUNT(DISTINCT sessionId) AS value\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime($__from / 1000)\n  AND timestamp <= toDateTime($__to / 1000)\n  AND event = 'init'\nGROUP BY\n  time,\n  metric\nORDER BY\n  time",
-                    "rawQuery": "/* grafana dashboard=counting events, user=1 */\nSELECT\n  toStartOfInterval(toDateTime(timestamp), INTERVAL 5 MINUTE) AS time,\n  'initiated_sessions' AS metric,\n  COUNT(DISTINCT sessionId) AS value\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime(1746182531238 / 1000)\n  AND timestamp <= toDateTime(1746183431238 / 1000)\n  AND eventT = 'init'\nGROUP BY\n  time,\n  metric\nORDER BY\n  time",
                     "refId": "A",
                     "round": "0s",
                     "showFormattedSQL": true,
@@ -424,12 +386,10 @@
                     "editorMode": "builder",
                     "extrapolate": true,
                     "format": "time_series",
-                    "formattedQuery": "/* grafana dashboard='Open Analytics Dashboard', user=1 */\nSELECT\n  toStartOfMinute(timestamp) AS time,\n  event,\n  count(*) AS event_count\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime(1761547323915 / 1000)\n  AND timestamp <= toDateTime(1761568923915 / 1000)\nGROUP BY time, event\nORDER BY time ASC, event",
                     "interval": "",
                     "intervalFactor": 1,
                     "nullifySparse": false,
                     "query": "SELECT\n  toStartOfMinute(timestamp) AS time,\n  event,\n  count(*) AS event_count\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime($__from / 1000)\n  AND timestamp <= toDateTime($__to / 1000)\nGROUP BY time, event\nORDER BY time ASC, event\n",
-                    "rawQuery": "/* grafana dashboard=counting events, user=1 */\nSELECT\n  toStartOfMinute(timestamp) AS t,\n  event,\n  count(*) AS event_count\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime(1746180516436 / 1000)\n  AND timestamp <= toDateTime(1746181416436 / 1000)\nGROUP BY t, event\nORDER BY t ASC, event",
                     "refId": "A",
                     "round": "0s",
                     "skip_comments": true,
@@ -485,21 +445,6 @@
                 },
                 "overrides": [
                     {
-                        "__systemRef": "hideSeriesFrom",
-                        "matcher": {
-                            "id": "byNames",
-                            "options": {
-                                "mode": "exclude",
-                                "names": [
-                                    "seeking"
-                                ],
-                                "prefix": "All except:",
-                                "readOnly": true
-                            }
-                        },
-                        "properties": []
-                    },
-                    {
                         "matcher": {
                             "id": "byName",
                             "options": "sessionId"
@@ -550,12 +495,10 @@
                     "editorMode": "builder",
                     "extrapolate": true,
                     "format": "table",
-                    "formattedQuery": "/* grafana dashboard='Open Analytics Dashboard', user=1 */\nSELECT *\nFROM default.epas_default\nWHERE sessionId = 'web-player-demo-1761566291637'\nORDER BY timestamp DESC",
                     "interval": "",
                     "intervalFactor": 1,
                     "nullifySparse": false,
-                    "query": "SELECT *\nFROM default.epas_default\nWHERE sessionId = $session\nORDER BY timestamp DESC",
-                    "rawQuery": "/* grafana dashboard=counting events, user=1 */\nSELECT\n  toStartOfInterval(toDateTime(timestamp), INTERVAL 5 MINUTE) AS time,\n  'initiated_sessions' AS metric,\n  COUNT(DISTINCT sessionId) AS value\nFROM default.epas_default\nWHERE\n  timestamp >= toDateTime(1746182531238 / 1000)\n  AND timestamp <= toDateTime(1746183431238 / 1000)\n  AND eventT = 'init'\nGROUP BY\n  time,\n  metric\nORDER BY\n  time",
+                    "query": "SELECT *\nFROM default.epas_default\nWHERE sessionId = ${session:singlequote}\nORDER BY timestamp DESC",
                     "refId": "A",
                     "round": "0s",
                     "showFormattedSQL": true,
@@ -603,11 +546,8 @@
     "templating": {
         "list": [
             {
-                "current": {
-                    "text": "web-player-demo-1761556492214",
-                    "value": "web-player-demo-1761556492214"
-                },
-                "definition": "SELECT DISTINCT sessionId FROM default.epas_default",
+                "current": {},
+                "definition": "SELECT sessionId\nFROM default.epas_default\nWHERE timestamp >= toDateTime($__from / 1000)\n  AND timestamp <= toDateTime($__to / 1000)\nGROUP BY sessionId\nORDER BY max(timestamp) DESC\nLIMIT 500",
                 "label": "Session",
                 "name": "session",
                 "options": [],
@@ -619,12 +559,11 @@
                     "datasourceMode": "Variable",
                     "editorMode": "builder",
                     "extrapolate": true,
-                    "format": "time_series",
-                    "formattedQuery": "/* grafana dashboard='Open Analytics Dashboard', user=1 */\nSELECT DISTINCT sessionId FROM default.epas_default",
+                    "format": "table",
                     "interval": "",
                     "intervalFactor": 1,
                     "nullifySparse": false,
-                    "query": "SELECT DISTINCT sessionId FROM default.epas_default",
+                    "query": "SELECT sessionId\nFROM default.epas_default\nWHERE timestamp >= toDateTime($__from / 1000)\n  AND timestamp <= toDateTime($__to / 1000)\nGROUP BY sessionId\nORDER BY max(timestamp) DESC\nLIMIT 500",
                     "round": "0s",
                     "skip_comments": true,
                     "useWindowFuncForMacros": true
